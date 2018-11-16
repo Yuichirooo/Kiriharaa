@@ -3,8 +3,7 @@ from ARIFISTIFIK import *
 from akad.ttypes import *
 from multiprocessing import Pool, Process
 from time import sleep
-import pytz, datetime, pafy, time, timeit, random, sys, ast, re, os, json, subprocess, threading, string, codecs, requests, ctypes, urllib, urllib.parse, wikipedia
-import urlopen
+import pytz, datetime, pafy, time, timeit, random, sys, six, ast, re, os, json, subprocess, threading, string, codecs, requests, request, ctypes, html5lib, urllib, urllib3, urllib.parse, wikipedia
 from datetime import timedelta, date
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -12,7 +11,7 @@ from googletrans import Translator
 import youtube_dl
 
 #cl = LineClient()
-cl = LineClient(authToken='Ey0OrcsUJ3L9cDSH29Xe.ud78EVgkeFt6hUWJcLT6JG.NVeMt/8srVC6+a0+2AL5jXMk/8DXW3uuRKlkGHZFHTg=')
+cl = LineClient(authToken='EycJHximhJr4v30Fm9se.ud78EVgkeFt6hUWJcLT6JG.p8xVg5lOFgsZS/8aZQc+M9EHSIbnLX1x+P2RK6pMZHs=')
 cl.log("Auth Token : " + str(cl.authToken))
 channel = LineChannel(cl)
 cl.log("Channel Access Token : " + str(channel.channelAccessToken))
@@ -184,6 +183,33 @@ def runtime(secs):
     days, hours = divmod(hours, 24)
     return '%02d Hari %02d Jam %02d Menit %02d Detik' % (days, hours, mins, secs)
 
+def download_page(url):
+    version = (3,0)
+    cur_version = sys.version_info
+    if cur_version >= version:     
+        import urllib,request
+        try:
+            headers = {}
+            headers['User-Agent'] = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
+            req = urllib,request.Request(url, headers = headers)
+            resp = urllib,request.urlopen(req)
+            respData = str(resp.read())
+            return respData
+        except Exception as e:
+            print(str(e))
+    else:
+        import urllib
+        try:
+            headers = {}
+            headers['User-Agent'] = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.27 Safari/537.17"
+            req = urllib.Request(url, headers = headers)
+            response = urllib.urlopen(req)
+            page = response.read()
+            return page
+        except:
+            return"Page Not found"
+
+
 def mentionMembers(to, mid):
     try:
         arrData = ""
@@ -293,20 +319,6 @@ def sendMention(to, mid, firstmessage):
     except Exception as error:
         cl.sendMessage(to, "[ INFO ] Error :\n" + str(error))
 
-def download_page(url):
-    version = (3,0)
-    cur_version = sys.version_info
-    if cur_version >= version:     
-        import urllib.request
-        try:
-            headers = {}
-            headers['User-Agent'] = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
-            req = urllib.request.Request(url, headers = headers)
-            resp = urllib.request.urlopen(req)
-            respData = str(resp.read())
-            return respData
-        except Exception as e:
-            print(str(e))
 
 def command(text):
     pesan = text.lower()
@@ -1975,15 +1987,15 @@ def bot(op):
                                 except:
                                     pass
                                 
-                        elif cmd == "kirihara stay":
-                          if wait["selfbot"] == True:
-                            if msg._from in admin:
-                                try:
-                                    ginfo = cl.getGroup(msg.to)
-                                    cl.inviteIntoGroup(msg.to, [Zmid])
-                                    cl.sendMessage(msg.to,"Grup 「"+str(ginfo.name)+"」 Aman Dari JS")
-                                except:
-                                    pass
+                        #elif cmd == "kirihara stay":
+                          #if wait["selfbot"] == True:
+                            #if msg._from in admin:
+                                #try:
+                                    #cl.inviteIntoGroup(msg.to, kirihara)
+                                    #sw.acceptGroupInvitation(msg.to)
+                                    #cl.sendMessage(msg.to,"Grup 「"+str(ginfo.name)+"」 Aman Dari JS")
+                                #except:
+                                    #pass
     
                         elif cmd == "joinall":
                           if wait["selfbot"] == True:
@@ -2070,7 +2082,7 @@ def bot(op):
                                 G.preventedJoinByTicket = True
                                 kc.updateGroup(G)
 
-                        elif cmd == "kirihara join":
+                        elif cmd == "kirihara stay":
                             if msg._from in admin:
                                 G = cl.getGroup(msg.to)
                                 ginfo = cl.getGroup(msg.to)
@@ -2082,11 +2094,19 @@ def bot(op):
                                 G = sw.getGroup(msg.to)
                                 G.preventedJoinByTicket = True
                                 sw.updateGroup(G)
+                                cl.sendMessage(msg.to,"Grup 「"+str(ginfo.name)+"」 Aman Dari JS")
+                                cl.sendMessage(to, None, contentMetadata={"STKID":"52270548","STKPKGID":"3753664","STKVER":"1"}, contentType=7)
 
                         elif cmd == "kirihara bye":
                             if msg._from in admin:
                                 G = cl.getGroup(msg.to)
                                 sw.leaveGroup(msg.to)
+
+                        elif cmd == "cancelall":
+                            if msg._from in admin:
+                                group = cl.getGroupIdsInvited()
+                                for _mid in group:
+                                    cl.cancelGroupInvitation(_mid)
 
                         elif cmd == "sprespon":
                           if wait["selfbot"] == True:
@@ -2165,6 +2185,7 @@ def bot(op):
                                         msg.contentMetadata = {'MENTION': str('{"MENTIONEES":' + json.dumps(arr) + '}')}
                                         msg.contentType = 0
                                         cl.sendMessage1(msg)
+                                        cl.sendMessage(to, None, contentMetadata={"STKID":"52270546","STKPKGID":"3753664","STKVER":"1"}, contentType=7)
                                     except:
                                         pass
                                     try:
@@ -2345,7 +2366,7 @@ def bot(op):
                                 textToSearch = msg.text.replace(sep[0] + " ","")
                                 query = urllib.parse.quote(textToSearch)
                                 search_url="https://www.youtube.com/results?search_query=" + query
-                                response = urllib.urlopen(url)
+                                response = urllib3.urlopen(url)
                                 html = response.read()
                                 soup = BeautifulSoup(html, "html.parser")
                                 results = soup.find(attrs={'class':'yt-uix-tile-link'})
@@ -2503,10 +2524,10 @@ def bot(op):
                               jumlah = int(korban2[1])
                               if jumlah <= 1000:
                                   for var in range(0,jumlah):
-                                      cl.sendMessage(midd, None, contentMetadata={'PRDID': '8220', 'PRDTYPE': 'STICKER', 'MSGTPL': '6'}, contentType=9)
-                                      ki.sendMessage(midd, None, contentMetadata={'PRDID': '7917', 'PRDTYPE': 'STICKER', 'MSGTPL': '6'}, contentType=9)
-                                      kk.sendMessage(midd, None, contentMetadata={'PRDID': '9428', 'PRDTYPE': 'STICKER', 'MSGTPL': '6'}, contentType=9)
-                                      kc.sendMessage(midd, None, contentMetadata={'PRDID': '8220', 'PRDTYPE': 'STICKER', 'MSGTPL': '6'}, contentType=9)
+                                      cl.sendMessage(midd, None, contentMetadata={'STKPKGID': '8220', 'PRDTYPE': 'STICKER', 'MSGTPL': '6'}, contentType=9)
+                                      ki.sendMessage(midd, None, contentMetadata={'STKPKGID': '7917', 'PRDTYPE': 'STICKER', 'MSGTPL': '6'}, contentType=9)
+                                      kk.sendMessage(midd, None, contentMetadata={'STKPKGID': '9428', 'PRDTYPE': 'STICKER', 'MSGTPL': '6'}, contentType=9)
+                                      kc.sendMessage(midd, None, contentMetadata={'STKPKGID': '8220', 'PRDTYPE': 'STICKER', 'MSGTPL': '6'}, contentType=9)
 
                         elif 'Spam: ' in msg.text:
                           if wait["selfbot"] == True:
@@ -2637,19 +2658,19 @@ def bot(op):
                               spl = msg.text.replace('Kirihara ','')
                               if spl == 'on':
                                   if msg.to in protectantijs:
-                                       msgs = "Kirihara Memantau dari luar."
+                                       msgs = "Kirihara Memantau yang spam."
                                   else:
                                        protectantijs.append(msg.to)
                                        ginfo = cl.getGroup(msg.to)
-                                       msgs = "Kirihara Memantau dari luar.\nDi Group : " +str(ginfo.name)
+                                       msgs = "Kirihara Memantau yang spam.\nDi Group : " +str(ginfo.name)
                                   cl.sendMessage(msg.to, "「Diaktifkan」\n" + msgs)
                               elif spl == 'off':
                                     if msg.to in protectantijs:
                                          protectantijs.remove(msg.to)
                                          ginfo = cl.getGroup(msg.to)
-                                         msgs = "Kirihara lagi ngopi jadi engga mantau dulu.\nDi Group : " +str(ginfo.name)
+                                         msgs = "Protect Spam dinonaktifkan.\nDi Group : " +str(ginfo.name)
                                     else:
-                                         msgs = "Kirihara lagi ngopi jadi engga mantau dulu."
+                                         msgs = "Protect Spam dinonaktifkan."
                                     cl.sendMessage(msg.to, "「Dinonaktifkan」\n" + msgs)
                                     
                         elif 'Ghost ' in msg.text:
